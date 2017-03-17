@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 	char key[BUFF];
 	char infile[BUFF];
 	struct sockaddr_in serverAddress, clientAddress;
+	char itskind[BUFF];
 
 	if (argc < 2) { fprintf(stderr,"USAGE: %s port\n", argv[0]); exit(1); } // Check usage & args
 
@@ -42,15 +43,36 @@ int main(int argc, char *argv[])
 	if (establishedConnectionFD < 0) error("ERROR on accept");
 
 	// Get the message from the client and display it
+	memset(itskind, '\0', BUFF);
+	charsRead = recv(establishedConnectionFD, itskind, BUFF, 0); // Read the client's message from the socket
+	if (charsRead < 0) error("ERROR reading from socket");
+	
+	if ('e' != itskind[0])
+	{
+		itskind[0] = 'v';
+		// Send a fail message back to the client
+		charsRead = send(establishedConnectionFD, itskind, 39, 0); // Send success back
+		if (charsRead < 0) error("ERROR writing to socket");
+		error("Encrpt Server has been connected to the wrong program");
+	}
+	else
+	{
+		// Send a Success message back to the client
+		charsRead = send(establishedConnectionFD, itskind, 39, 0); // Send success back
+		if (charsRead < 0) error("ERROR writing to socket");
+	}
+	 
+//printf(itskind);
+	// Get the message from the client and display it
 	memset(infile, '\0', BUFF);
 	charsRead = recv(establishedConnectionFD, infile, BUFF, 0); // Read the client's message from the socket
 	if (charsRead < 0) error("ERROR reading from socket");
-
+//printf(infile);
 	// Get the key from the client and display it
 	memset(key, '\0', BUFF);
 	charsRead = recv(establishedConnectionFD, key, BUFF, 0); // Read the client's message from the socket
 	if (charsRead < 0) error("ERROR reading from socket");
-
+//printf(key);
 	///
 	//
 	//
@@ -83,6 +105,7 @@ int main(int argc, char *argv[])
 				output[i] = (char)(calc + (int)'A');
 
 			i++;
+			//printf(output);
 		}
 
 	//

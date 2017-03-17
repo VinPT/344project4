@@ -17,7 +17,8 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serverAddress;
 	struct hostent* serverHostInfo;
 	char buffer[NBUFF];
-	
+	char mykind[NBUFF];
+
 	FILE *infile;
 	char infilename[NBUFF];
 	char infiletext[XBUFF];
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
 	int i; //das universal counter
 	if (argc != 4) { fprintf(stderr,"USAGE: %s hostname port\n", argv[0]); exit(0); } // Check usage & args
 
+	strcpy(mykind, "eeee\n\0");
 	strcpy(infilename,argv[1]);
 	strcpy(keyname,argv[2]);
 	portNumber = atoi(argv[3]); // Get the port number, convert to an integer from a string
@@ -124,8 +126,19 @@ int main(int argc, char *argv[])
 	if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) // Connect socket to address
 		error("CLIENT: ERROR connecting");
 
-	// Get input message from user
-	//memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer array
+
+	// Send message to server
+	// Write Client type to server
+	charsWritten = send(socketFD, mykind, strlen(mykind), 0); // Write to the server
+	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
+	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
+
+	// Get Client type from server. v == wrong server
+	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
+	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
+	if (buffer[0]=='v')error("encript client connected to wrong server");
+	
 
 	// Send message to server
 	//charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
