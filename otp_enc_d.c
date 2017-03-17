@@ -45,13 +45,11 @@ int main(int argc, char *argv[])
 	memset(infile, '\0', BUFF);
 	charsRead = recv(establishedConnectionFD, infile, BUFF, 0); // Read the client's message from the socket
 	if (charsRead < 0) error("ERROR reading from socket");
-	printf("SERVER: I received this from the client: \"%s\"\n", infile);
 
 	// Get the key from the client and display it
 	memset(key, '\0', BUFF);
 	charsRead = recv(establishedConnectionFD, key, BUFF, 0); // Read the client's message from the socket
 	if (charsRead < 0) error("ERROR reading from socket");
-	printf("SERVER: I received this from the client: \"%s\"\n", key);
 
 	///
 	//

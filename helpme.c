@@ -30,10 +30,12 @@ int main(int argc, char *argv[])
 	char buffer[1000];
     
 
-	printf("i have %d args",argc);
+	printf("i have %d args",argc); fflush(stdout);
 	scanf(buffer);
 	//if (argc > 5 || argc <= 3) error("invalid number of arguments. argument format must be otp_enc plaintext key port [> outfile] [&]");
-	printf("i have %d args",argc);
+	printf("i have %d args",argc); fflush(stdout);have 5 argsos-class ~/344project4 1013$ 
+
+
 	//strcpy(pTName, argv[1]);
 	//strcpy(keyName,argv[2]);
 	//portNumber = atoi(argv[3]);
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
 	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
 	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-	printf("CLIENT: I received this from the server: \"%s\"\n", buffer);
+	printf("%s\n", buffer);
 
 	close(socketFD); // Close the socket
 	return 0;
