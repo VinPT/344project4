@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#define BUFF 100
+#define BUFF 1000
 #define NBUFF 256
 #define XBUFF 100000
 void error(const char *msg) { perror(msg); exit(0); } // Error function used for reporting issues

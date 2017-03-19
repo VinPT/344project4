@@ -164,11 +164,11 @@ int main(int argc, char *argv[])
 					//
 					///
 					i = 0;
-					while (i*BUFF < strlen(output))
+					while (i*(BUFF-1) < strlen(output))
 					{
 //printf("%s\n", output);
 						memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-						strncpy(buffer, &output[i*BUFF], BUFF-1);
+						strncpy(buffer, &output[i*(BUFF-1)], BUFF-1);
 					//printf("client   %s\n",buffer);
 
 						// Send message to server
