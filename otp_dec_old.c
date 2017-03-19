@@ -5,9 +5,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
+#include <netdb.h> 
 
-#define BUFF 100
 #define NBUFF 256
 #define XBUFF 100000
 void error(const char *msg) { perror(msg); exit(0); } // Error function used for reporting issues
@@ -17,7 +16,7 @@ int main(int argc, char *argv[])
 	int socketFD, portNumber, charsWritten, charsRead;
 	struct sockaddr_in serverAddress;
 	struct hostent* serverHostInfo;
-	char buffer[BUFF];
+	char buffer[NBUFF];
 	char mykind[NBUFF];
 
 	FILE *infile;
@@ -28,12 +27,11 @@ int main(int argc, char *argv[])
 	char keyname[NBUFF];
 	char keytext[XBUFF];
 	int keylen = 0;
-
+	
 	char c;
 	int i; //das universal counter
 	if (argc != 4) { fprintf(stderr,"USAGE: %s hostname port\n", argv[0]); exit(0); } // Check usage & args
-
-	strcpy(mykind, "eeee\n\0");
+	strcpy(mykind, "dddd\n\0");
 	strcpy(infilename,argv[1]);
 	strcpy(keyname,argv[2]);
 	portNumber = atoi(argv[3]); // Get the port number, convert to an integer from a string
@@ -50,7 +48,7 @@ int main(int argc, char *argv[])
 			{
 				if ((int)c == '\n')  // 10 should be \n ... i could not get \n to work
 				{
-					c = '@';
+					c = '\0';
 				}
 				else if ((int)c == -1){}
 				else if((int)c != (int)' ')
@@ -67,7 +65,7 @@ int main(int argc, char *argv[])
 		}while (c != EOF);
 	}
 
-	infilelen = i;
+	infilelen = i; 
 
 	fclose(infile);
 
@@ -83,7 +81,7 @@ int main(int argc, char *argv[])
 			{
 				if ((int)c == '\n')  // 10 should be \n ... i could not get \n to work
 				{
-					c = '@';
+					c = '\0';
 				}
 				else if ((int)c == -1){} // i think -1 is eof
 				else if((int)c != (int)' ')
@@ -122,14 +120,16 @@ int main(int argc, char *argv[])
 	// Set up the socket
 	socketFD = socket(AF_INET, SOCK_STREAM, 0); // Create the socket
 	if (socketFD < 0) error("CLIENT: ERROR opening socket");
-
+	
 	// Connect to server
 	if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) // Connect socket to address
 		error("CLIENT: ERROR connecting");
 
+	// Get input message from user
+	//memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer array
 
 	// Send message to server
-	// Write Client type to server
+	// Write Client type to server this one is client type d
 	charsWritten = send(socketFD, mykind, strlen(mykind), 0); // Write to the server
 	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
 	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
@@ -138,59 +138,29 @@ int main(int argc, char *argv[])
 	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
 	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
 	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-	if (buffer[0]=='v')error("encript client connected to wrong server");
+	if ('v' == buffer[0]) error("CLIENT: ERROR decode connected to wrong server");
+	
+	
+	
+	// Send message to server
+	//charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
+	charsWritten = send(socketFD, infiletext, strlen(infiletext), 0); // Write to the server
+	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
+	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
+	
+	// Send message to server
+	//charsWritten = send(socketFD, buffer, strlen(buffer), 0); // Write to the server
+	charsWritten = send(socketFD, keytext, strlen(keytext), 0); // Write to the server
+	if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
+	if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
 
-	int bufflen = BUFF-1;
-//printf("client  %d\n",bufflen);
-	i = 0;
-	while (i*bufflen < infilelen)
-	{
 
-		memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-		strncpy(buffer, &infiletext[i*bufflen], bufflen);
-//printf("client   %s\n",buffer);
+	// Get return message from server
+	memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
+	charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
+	if (charsRead < 0) error("CLIENT: ERROR reading from socket");
+	printf("%s\n", buffer);
 
-		// Send message to server
-		charsWritten = send(socketFD, buffer, bufflen, 0); // Write to the server
-		if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
-		if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
-		i++;
-	}
-	i = 0;
-
-	//writing for the key
-	while (i*bufflen < keylen)
-	{
-
-		memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-		strncpy(buffer, &keytext[i*bufflen], bufflen);
-//printf("client   %s\n",buffer);
-
-		// Send message to server
-		charsWritten = send(socketFD, buffer, bufflen, 0); // Write to the server
-		if (charsWritten < 0) error("CLIENT: ERROR writing to socket");
-		if (charsWritten < strlen(buffer)) printf("CLIENT: WARNING: Not all data written to socket!\n");
-		i++;
-	}
-
-	char *ch;
-	while (1)
-	{
-		// Get return message from server
-		memset(buffer, '\0', sizeof(buffer)); // Clear out the buffer again for reuse
-		charsRead = recv(socketFD, buffer, sizeof(buffer) - 1, 0); // Read data from the socket, leaving \0 at end
-		if (charsRead < 0) error("CLIENT: ERROR reading from socket");
-		if ((ch = strstr(buffer, "@")) != 0)
-		{
-			break;
-		}
-		printf("%s", buffer);
-	}
-	char buffer2[BUFF];
-	strncpy(buffer2, buffer, ch-buffer);
-
-	printf(buffer2);
-	printf("\n");
 	close(socketFD); // Close the socket
 	return 0;
 }
