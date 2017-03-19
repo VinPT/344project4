@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	int i; //das universal counter
 	if (argc != 4) { fprintf(stderr,"USAGE: %s hostname port\n", argv[0]); exit(0); } // Check usage & args
 
-	strcpy(mykind, "eeee\n\0");
+	strcpy(mykind, "dddd\n\0");
 	strcpy(infilename,argv[1]);
 	strcpy(keyname,argv[2]);
 	portNumber = atoi(argv[3]); // Get the port number, convert to an integer from a string

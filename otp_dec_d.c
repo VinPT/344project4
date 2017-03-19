@@ -68,13 +68,13 @@ int main(int argc, char *argv[])
 					charsRead = recv(establishedConnectionFD, itskind, BUFF, 0); // Read the client's message from the socket
 					if (charsRead < 0) error("ERROR reading from socket");
 
-					if ('e' != itskind[0])
+					if ('d' != itskind[0])
 					{
 						itskind[0] = 'v';
 						// Send a fail message back to the client
 						charsRead = send(establishedConnectionFD, itskind, 39, 0); // Send success back
 						if (charsRead < 0) error("ERROR writing to socket");
-						error("Encrpt Server has been connected to the wrong program");
+						error("Decript Server has been connected to the wrong program");
 					}
 					else
 					{
@@ -143,8 +143,12 @@ int main(int argc, char *argv[])
 							{
 								infile[i] = (char)((int)infile[i]-(int)'A');
 							}
-							calc = ((((int)infile[i]) + ((int)key[i]-(int)'A')) % 27);  ///used to be 26
+							calc = (((int)infile[i]) - ((int)key[i]-(int)'A'));
 
+							if (0 > calc)
+							{
+								calc = calc +27;
+							}
 							if(26 == calc) // used to be 25
 							{
 								output[i] = ' ';
